@@ -127,12 +127,13 @@ class Gallery(object):
         import binascii
         import hashlib
         from requests.utils import quote
+        from base64 import b64encode 
 
         """returns HMAC-SHA1 sign"""
 
         q = lambda x: quote(x, safe="~")
         sorted_params = collections.OrderedDict(sorted(params.items()))
-        normalized_params = urllib.urlencode(sorted_params)
+        normalized_params = urllib.parse.urlencode(sorted_params,encoding='utf-8')
         base_string = "&".join((httpMethod.upper(), q(url), q(normalized_params)))
-        sig = hmac.new("&".join([self.apiSecret, '']), base_string, hashlib.sha1)
-        return sig.digest().encode("base64").rstrip('\n')
+        sig = hmac.new( "&".join([self.apiSecret, '']).encode('utf-8'), (base_string).encode('utf-8'), hashlib.sha1).hexdigest()
+        return b64encode(binascii.unhexlify(sig)).decode("utf-8")
